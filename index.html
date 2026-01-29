@@ -186,3 +186,14 @@ function pickWinner() {
 </button>
 
 <p id="adminResult"></p>
+    </script>let tapCount = 0;
+
+document.body.addEventListener("click", () => {
+  tapCount++;
+  if (tapCount === 7) {   // 7 taps = admin
+    document.getElementById("adminBtn").style.display = "block";
+    alert("Admin mode unlocked");
+  }
+});</script>
+
+      
