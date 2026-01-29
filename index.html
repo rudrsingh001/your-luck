@@ -187,17 +187,18 @@ function pickWinner() {
 
 <p id="adminResult"></p>
     </script>let tapCount = 0;
+<script>
+let tapCount = 0;
 
 document.body.addEventListener("click", () => {
   tapCount++;
-  if (tapCount === 7) {   // 7 taps = admin
+  if (tapCount === 7) {
     document.getElementById("adminBtn").style.display = "block";
     alert("Admin mode unlocked");
   }
 });
-    </script>
-</script>
-      function askAdmin() {
+
+function askAdmin() {
   let pass = prompt("Enter Admin Password");
 
   if (pass !== "luck123") {
@@ -217,6 +218,9 @@ document.body.addEventListener("click", () => {
   document.getElementById("adminResult").innerText =
     "🎉 Winner: " + winner.name + " (" + winner.mobile + ")";
 }
+</script>
+
+
   </script>
 <style> #countdown {
   font-size: 26px;
@@ -231,4 +235,6 @@ document.body.addEventListener("click", () => {
   100% { opacity: 1; }
 }
 
+  <script>
   
+</script>
