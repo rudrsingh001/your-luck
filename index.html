@@ -113,9 +113,8 @@ function showList() {
     if (!name) return;
 
     let mobile = prompt("Enter your mobile number");
-    if (!mobile) return;
-
-    alert("Thanks " + name + "! You are registered for the next lucky draw 🍀");
+    if (!mobile) return 
+  
   });
 </script>
 <script>
@@ -127,7 +126,6 @@ function showList() {
   <p>Time: Every 1 Hour</p>
   <button onclick="openForm()">Participate ₹10</button>
 </div>
-<h2>Next Draw In</h2>
 <p id="timer" style="font-size:20px;font-weight:bold;"></p>
 <script>
 function pickWinner() {
