@@ -61,3 +61,15 @@
 }
 
 </script>
+<button id="joinBtn">Participate ₹10</button>
+<script>
+  document.getElementById("joinBtn").addEventListener("click", function () {
+    let name = prompt("Enter your name");
+    if (!name) return;
+
+    let mobile = prompt("Enter your mobile number");
+    if (!mobile) return;
+
+    alert("Thanks " + name + "! You are registered for the next lucky draw 🍀");
+  });
+</script>
