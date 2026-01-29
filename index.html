@@ -1,4 +1,4 @@
-<h3>Participants</h3>
+⁷<h3>Participants</h3>
 <ul id="list"></ul>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0d6efd">
@@ -127,3 +127,18 @@ function showList() {
   <p>Time: Every 1 Hour</p>
   <button onclick="openForm()">Participate ₹10</button>
 </div>
+<h2>Next Draw In</h2>
+<p id="timer" style="font-size:20px;font-weight:bold;"></p>
+function pickWinner() {
+  if (participants.length === 0) {
+    alert("No participants");
+    return;
+  }
+
+  let win = participants[
+    Math.floor(Math.random() * participants.length)
+  ];
+
+  document.getElementById("winner").innerText =
+    "🎉 Winner: " + win.name;
+}
