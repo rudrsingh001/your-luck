@@ -1,6 +1,38 @@
 ⁷<h3>Participants</h3>
-<button id="adminBtn" onclick="askAdmin()" style="display:none;">
-  🔐 Admin Panel
+<script>
+let tapCount = 0;
+
+// secret admin unlock
+document.body.addEventListener("click", () => {
+  tapCount++;
+  if (tapCount === 7) {
+    document.getElementById("adminBtn").style.display = "block";
+    alert("Admin unlocked");
+  }
+});
+
+function askAdmin() {
+  const pass = prompt("Enter Admin Password");
+
+  if (pass !== "luck123") {
+    alert("Wrong password");
+    return;
+  }
+
+  if (participants.length === 0) {
+    document.getElementById("adminResult").innerText =
+      "No participants yet";
+    return;
+  }
+
+  const winner =
+    participants[Math.floor(Math.random() * participants.length)];
+
+  document.getElementById("adminResult").innerText =
+    "Winner: " + winner.name + " (" + winner.mobile + ")";
+}
+</script>
+
 </button>
 
 <p id="adminResult" style="margin-top:10px;font-weight:bold;"></p>
