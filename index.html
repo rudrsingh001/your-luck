@@ -49,9 +49,36 @@
 <p id="msg"></p>
 
 <script>
+let participants = [];
+
 function submitForm() {
+  let name = document.getElementById("name").value;
+  let mobile = document.getElementById("mobile").value;
+
+  if (name === "" || mobile === "") {
+    alert("Please fill all details");
+    return;
+  }
+
+  participants.push({ name, mobile });
+  showList();
+
   document.getElementById("msg").innerText =
     "Thanks! You have successfully participated.";
+
+  document.getElementById("name").value = "";
+  document.getElementById("mobile").value = "";
+}
+
+function showList() {
+  let ul = document.getElementById("list");
+  ul.innerHTML = "";
+
+  participants.forEach((p, i) => {
+    let li = document.createElement("li");
+    li.innerText = (i + 1) + ". " + p.name + " (" + p.mobile + ")";
+    ul.appendChild(li);
+  });
 }
 </script>
 
