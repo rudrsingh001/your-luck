@@ -148,3 +148,36 @@ function pickWinner() {
 }
 
 </script>
+      <p id="countdown">Loading...</p>
+
+<script>
+  function startCountdown() {
+    const now = new Date().getTime();
+
+    // Next full hour
+    const nextHour = new Date();
+    nextHour.setMinutes(60, 0, 0);
+
+    function updateTimer() {
+      const current = new Date().getTime();
+      const diff = nextHour - current;
+
+      if (diff <= 0) {
+        location.reload(); // hour complete hone par refresh
+        return;
+      }
+
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").innerText =
+        minutes.toString().padStart(2, "0") + ":" +
+        seconds.toString().padStart(2, "0");
+    }
+
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  }
+
+  startCountdown();
+</script>
