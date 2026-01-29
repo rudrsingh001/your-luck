@@ -129,6 +129,7 @@ function showList() {
 </div>
 <h2>Next Draw In</h2>
 <p id="timer" style="font-size:20px;font-weight:bold;"></p>
+<script>
 function pickWinner() {
   if (participants.length === 0) {
     alert("No participants");
@@ -139,3 +140,15 @@ function pickWinner() {
   document.getElementById("winner").innerText =
     "🎉 Winner: " + win.name;
 }
+function pickWinner() {
+  if (participants.length === 0) {
+    alert("No participants");
+    return;
+  }
+
+  let win = participants[Math.floor(Math.random() * participants.length)];
+  document.getElementById("winner").innerText =
+    "🎉 Winner: " + win.name;
+}
+
+</script>
