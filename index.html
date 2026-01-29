@@ -37,6 +37,16 @@
     }
     button {
       <h2>Participate in Lucky Draw</h2>
+<div id="formBox" style="display:none; margin-top:20px;">
+  <input type="text" id="name" placeholder="Your Name"><br><br>
+  <input type="number" id="mobile" placeholder="Mobile Number"><br><br>
+  <button onclick="submitForm()">Submit</button>
+
+  <p id="msg"></p>
+
+  <h3>Participants</h3>
+  <ul id="list"></ul>
+</div>
 
 <form onsubmit="submitForm(); return false;">
   <input type="text" id="name" placeholder="Enter your name" required><br><br>
@@ -120,3 +130,6 @@ function showList() {
     navigator.serviceWorker.register("service-worker.js");
   }
 </script>
+function openForm() {
+  document.getElementById("formBox").style.display = "block";
+}
