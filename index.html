@@ -1,3 +1,5 @@
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d6efd">
 
 <!DOCTYPE html>
 <html lang="en">
@@ -72,4 +74,9 @@
 
     alert("Thanks " + name + "! You are registered for the next lucky draw 🍀");
   });
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
 </script>
