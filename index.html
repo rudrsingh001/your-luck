@@ -135,10 +135,7 @@ function pickWinner() {
     return;
   }
 
-  let win = participants[
-    Math.floor(Math.random() * participants.length)
-  ];
-
+  let win = participants[Math.floor(Math.random() * participants.length)];
   document.getElementById("winner").innerText =
     "🎉 Winner: " + win.name;
 }
