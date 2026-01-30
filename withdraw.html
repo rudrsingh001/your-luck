@@ -7,7 +7,7 @@
   <style>
     body{font-family:Arial;margin:0;background:#0b66ff;color:#111}
     .box{max-width:420px;margin:40px auto;background:#fff;border-radius:12px;padding:18px}
-    input,button{width:100%;padding:12px;margin:8px 0;font-size:16px}
+    input,button{width:100%;padding:12px;margin:8px 0;font-size:16px;box-sizing:border-box}
     button{background:#28a745;color:#fff;border:0;border-radius:8px}
     .muted{color:#666;font-size:14px}
   </style>
@@ -26,7 +26,7 @@
     <input id="upi" placeholder="Your UPI ID (example: name@upi)" />
     <input id="wcoins" type="number" placeholder="Coins to Withdraw (min 100)" />
 
-    <button onclick="submitWithdraw()">Request Withdrawal</button>
+    <button id="btn" onclick="submitWithdraw()">Request Withdrawal</button>
 
     <p id="msg" class="muted"></p>
 
@@ -34,86 +34,78 @@
     <a href="index.html">⬅ Back to Home</a>
   </div>
 
-<script>
-  // load coins
-  let coins = localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
-  document.getElementById("coins").innerText = coins;
-  document.getElementById("rupees").innerText = (coins/10).toFixed(2);
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
-  // ✅ apne form ka base URL (viewform wala)
-const FORM_URL = "https://docs.google.com/forms/d/e/XXXXXXXXXXXX/viewform?usp=pp_url";
+  <script>
+    // ✅ coins load
+    let coins = localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
+    document.getElementById("coins").innerText = coins;
+    document.getElementById("rupees").innerText = (coins/10).toFixed(2);
 
-// ✅ apne entry ids yahan paste karo
-const NAME_ENTRY = "entry.1111111111";
-const UPI_ENTRY  = "entry.2222222222";
-const COIN_ENTRY = "entry.3333333333";
+    // ✅ 1) PASTE YOUR firebaseConfig HERE
+    const firebaseConfig = {
+      apiKey: "PASTE_HERE",
+      authDomain: "PASTE_HERE",
+      projectId: "PASTE_HERE",
+      storageBucket: "PASTE_HERE",
+      messagingSenderId: "PASTE_HERE",
+      appId: "PASTE_HERE"
+    };
 
-const url =
-  `${FORM_URL}&${NAME_ENTRY}=${encodeURIComponent(name)}` +
-  `&${UPI_ENTRY}=${encodeURIComponent(upi)}` +
-  `&${COIN_ENTRY}=${encodeURIComponent(wcoins)}`;
+    // ✅ 2) init firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-window.open(url, "_blank");
-document.getElementById("msg").innerText = "✅ Form opened. Submit to request withdrawal.";
-db.collection("withdraw_requests").add({
-  name: name,
-  upi: upi,
-  coins: wcoins,
-  amount: wcoins / 10,
-  status: "pending",
-  createdAt: new Date().toISOString()
-})
-.then(() => {
-  document.getElementById("msg").innerText = "✅ Request submitted (Pending).";
-})
-.catch((err) => {
-  document.getElementById("msg").innerText = "❌ Error: " + err.message;
-});
+    // ✅ 3) submit withdraw request
+    function submitWithdraw() {
+      const name = document.getElementById("name").value.trim();
+      const upi = document.getElementById("upi").value.trim();
+      const wcoins = parseInt(document.getElementById("wcoins").value);
 
+      const msg = document.getElementById("msg");
+      const btn = document.getElementById("btn");
 
-    if(!name || !upi || !wcoins){
-      document.getElementById("msg").innerText = "❌ Please fill all fields";
-      return;
+      if (!name || !upi || !wcoins) {
+        msg.innerText = "❌ Please fill all fields";
+        return;
+      }
+      if (wcoins < 100) {
+        msg.innerText = "❌ Minimum 100 coins required";
+        return;
+      }
+      if (wcoins > coins) {
+        msg.innerText = "❌ You don't have enough coins";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = "Submitting...";
+      msg.innerText = "⏳ Please wait...";
+
+      db.collection("withdraw_requests").add({
+        name: name,
+        upi: upi,
+        coins: wcoins,
+        amount: wcoins / 10,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        userAgent: navigator.userAgent
+      })
+      .then(() => {
+        msg.innerText = "✅ Request submitted! Status: Pending";
+        btn.disabled = false;
+        btn.innerText = "Request Withdrawal";
+        document.getElementById("wcoins").value = "";
+      })
+      .catch((err) => {
+        msg.innerText = "❌ Error: " + err.message;
+        btn.disabled = false;
+        btn.innerText = "Request Withdrawal";
+      });
     }
-    if(wcoins < 100){
-      document.getElementById("msg").innerText = "❌ Minimum 100 coins required";
-      return;
-    }
-    if(wcoins > coins){
-      document.getElementById("msg").innerText = "❌ You don't have enough coins";
-      return;
-    }
+  </script>
 
-    // ✅ IMPORTANT: yahan real submit backend chahiye
-    // For now: copy message + show instruction
-    const text = `WITHDRAW REQUEST\nName: ${name}\nUPI: ${upi}\nCoins: ${wcoins}\nAmount: ₹${(wcoins/10).toFixed(2)}`;
-    navigator.clipboard?.writeText(text);
-
-    document.getElementById("msg").innerText =
-      "✅ Request created! (Copied). Abhi backend add karna hai (Google Form/Firebase)";
-
-    // optional: temporarily deduct coins after admin approves (recommended)
-    // abhi deduct mat karo, warna fake requests me coins cut ho jayenge
-  }
-</script>
 </body>
 </html>
-
-<a href="withdraw.html">
-  <button style="padding:10px 14px;border-radius:6px;">Withdraw</button>
-</a>
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "PASTE_HERE",
-    authDomain: "PASTE_HERE",
-    projectId: "PASTE_HERE",
-    storageBucket: "PASTE_HERE",
-    messagingSenderId: "PASTE_HERE",
-    appId: "PASTE_HERE"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-</script>
