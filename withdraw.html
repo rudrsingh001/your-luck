@@ -1,53 +1,81 @@
-c<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Withdraw</title>
+
   <style>
-    body{font-family:Arial;margin:0;background:#0b66ff;color:#111}
-    .box{max-width:420px;margin:40px auto;background:#fff;border-radius:12px;padding:18px}
-    input,button{width:100%;padding:12px;margin:8px 0;font-size:16px;box-sizing:border-box}
-    button{background:#28a745;color:#fff;border:0;border-radius:8px}
-    .muted{color:#666;font-size:14px}
+    body {
+      margin: 0;
+      background: #0b66ff;
+      font-family: Arial, sans-serif;
+    }
+    .box {
+      max-width: 420px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+    }
+    .muted {
+      font-size: 14px;
+      color: #555;
+    }
   </style>
 </head>
+
 <body>
 
-  <div class="box">
-    <h2>Withdraw Coins</h2>
+<div class="box">
+  <h2>Withdraw Coins</h2>
 
-    <p><b>Coins:</b> <span id="coins">0</span></p>
-    <p><b>Balance:</b> ₹<span id="rupees">0</span></p>
+  <p><b>Coins:</b> <span id="coins">0</span></p>
+  <p><b>Balance:</b> ₹<span id="rupees">0</span></p>
 
-    <p class="muted">Rule: 10 Coins = ₹1 | Minimum withdraw: 100 coins (₹10)</p>
+  <p class="muted">10 Coins = ₹1 | Minimum withdrawal = 100 coins</p>
 
-    <input id="name" placeholder="Your Name" />
-    <input id="upi" placeholder="Your UPI ID (example: name@upi)" />
-    <input id="wcoins" type="number" placeholder="Coins to Withdraw (min 100)" />
+  <input id="name" placeholder="Your Name">
+  <input id="upi" placeholder="Your UPI ID (example: name@upi)">
+  <input id="wcoins" type="number" placeholder="Coins to Withdraw (min 100)">
 
-    <button id="btn" onclick="submitWithdraw()">Request Withdrawal</button>
+  <button id="btn" onclick="submitWithdraw()">Request Withdrawal</button>
 
-    <p id="msg" class="muted"></p>
+  <p id="msg" class="muted"></p>
 
-    <hr>
-    <a href="index.html">⬅ Back to Home</a>
-  </div>
+  <hr>
+  <a href="index.html">⬅ Back to Home</a>
+</div>
 
-  <!-- Firebase SDK (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
-  <script>
-    <script>
-  // ✅ coins load
-  let coins = localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
+<script>
+  // Load coins
+  let coins = localStorage.getItem("coins")
+    ? parseInt(localStorage.getItem("coins"))
+    : 0;
+
   document.getElementById("coins").innerText = coins;
-  document.getElementById("rupees").innerText = (coins/10).toFixed(2);
+  document.getElementById("rupees").innerText = (coins / 10).toFixed(2);
 
-  // ✅ 1) FIREBASE CONFIG (YAHAN)
+  // 🔥 PASTE REAL firebaseConfig HERE
   const firebaseConfig = {
-    apiKey: "AIzaSyD-REAL-KEY",
+    apiKey: "AIzaSyXXXX",
     authDomain: "yoursluck.firebaseapp.com",
     projectId: "yoursluck",
     storageBucket: "yoursluck.appspot.com",
@@ -55,16 +83,13 @@ c<!doctype html>
     appId: "1:123456789:web:abc123"
   };
 
-  // ✅ 2) init firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // ✅ 3) submit withdraw request
   function submitWithdraw() {
     const name = document.getElementById("name").value.trim();
     const upi = document.getElementById("upi").value.trim();
     const wcoins = parseInt(document.getElementById("wcoins").value);
-
     const msg = document.getElementById("msg");
     const btn = document.getElementById("btn");
 
@@ -77,7 +102,7 @@ c<!doctype html>
       return;
     }
     if (wcoins > coins) {
-      msg.innerText = "❌ You don't have enough coins";
+      msg.innerText = "❌ Not enough coins";
       return;
     }
 
@@ -86,13 +111,12 @@ c<!doctype html>
     msg.innerText = "⏳ Please wait...";
 
     db.collection("withdraw_requests").add({
-      name: name,
-      upi: upi,
+      name,
+      upi,
       coins: wcoins,
       amount: wcoins / 10,
       status: "pending",
-      createdAt: new Date().toISOString(),
-      userAgent: navigator.userAgent
+      createdAt: new Date().toISOString()
     })
     .then(() => {
       msg.innerText = "✅ Request submitted! Status: Pending";
@@ -100,7 +124,7 @@ c<!doctype html>
       btn.innerText = "Request Withdrawal";
       document.getElementById("wcoins").value = "";
     })
-    .catch((err) => {
+    .catch(err => {
       msg.innerText = "❌ Error: " + err.message;
       btn.disabled = false;
       btn.innerText = "Request Withdrawal";
@@ -108,60 +132,6 @@ c<!doctype html>
   }
 </script>
 
-
-      if (!name || !upi || !wcoins) {
-        msg.innerText = "❌ Please fill all fields";
-        return;
-      } const firebaseConfig = {
-  apiKey: "AIzaSyD-REAL-KEY",
-  authDomain: "yoursluck.firebaseapp.com",
-  projectId: "yoursluck",
-  storageBucket: "yoursluck.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123"
-};
-
-      if (wcoins < 100) {
-        msg.innerText = "❌ Minimum 100 coins required";
-        return;
-      }
-      if (wcoins > coins) {
-        msg.innerText = "❌ You don't have enough coins";
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerText = "Submitting...";
-      msg.innerText = "⏳ Please wait...";
-
-      db.collection("withdraw_requests").add({
-        name: name,
-        upi: upi,
-        coins: wcoins,
-        amount: wcoins / 10,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-        userAgent: navigator.userAgent
-      })
-      .then(() => {
-        msg.innerText = "✅ Request submitted! Status: Pending";
-        btn.disabled = false;
-        btn.innerText = "Request Withdrawal";
-        document.getElementById("wcoins").value = "";
-      })
-      .catch((err) => {
-        msg.innerText = "❌ Error: " + err.message;
-        btn.disabled = false;
-        btn.innerText = "Request Withdrawal";
-      });
-    }
-  </script>
-
 </body>
 </html>
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
-<script>
-  // yahin par code hota hai
-</script>
