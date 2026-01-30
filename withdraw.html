@@ -40,10 +40,22 @@
   document.getElementById("coins").innerText = coins;
   document.getElementById("rupees").innerText = (coins/10).toFixed(2);
 
-  function submitWithdraw(){
-    const name = document.getElementById("name").value.trim();
-    const upi = document.getElementById("upi").value.trim();
-    const wcoins = parseInt(document.getElementById("wcoins").value);
+  // ✅ apne form ka base URL (viewform wala)
+const FORM_URL = "https://docs.google.com/forms/d/e/XXXXXXXXXXXX/viewform?usp=pp_url";
+
+// ✅ apne entry ids yahan paste karo
+const NAME_ENTRY = "entry.1111111111";
+const UPI_ENTRY  = "entry.2222222222";
+const COIN_ENTRY = "entry.3333333333";
+
+const url =
+  `${FORM_URL}&${NAME_ENTRY}=${encodeURIComponent(name)}` +
+  `&${UPI_ENTRY}=${encodeURIComponent(upi)}` +
+  `&${COIN_ENTRY}=${encodeURIComponent(wcoins)}`;
+
+window.open(url, "_blank");
+document.getElementById("msg").innerText = "✅ Form opened. Submit to request withdrawal.";
+
 
     if(!name || !upi || !wcoins){
       document.getElementById("msg").innerText = "❌ Please fill all fields";
