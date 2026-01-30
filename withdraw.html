@@ -45,14 +45,7 @@
     document.getElementById("rupees").innerText = (coins/10).toFixed(2);
 
     // ✅ 1) PASTE YOUR firebaseConfig HERE
-    const firebaseConfig = {
-      apiKey: "PASTE_HERE",
-      authDomain: "PASTE_HERE",
-      projectId: "PASTE_HERE",
-      storageBucket: "PASTE_HERE",
-      messagingSenderId: "PASTE_HERE",
-      appId: "PASTE_HERE"
-    };
+    
 
     // ✅ 2) init firebase
     firebase.initializeApp(firebaseConfig);
@@ -70,7 +63,15 @@
       if (!name || !upi || !wcoins) {
         msg.innerText = "❌ Please fill all fields";
         return;
-      }
+      } const firebaseConfig = {
+  apiKey: "AIzaSyD-REAL-KEY",
+  authDomain: "yoursluck.firebaseapp.com",
+  projectId: "yoursluck",
+  storageBucket: "yoursluck.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abc123"
+};
+
       if (wcoins < 100) {
         msg.innerText = "❌ Minimum 100 coins required";
         return;
