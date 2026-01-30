@@ -301,3 +301,12 @@ function showSuccess() {
   alert("🎉 Entry Successful!\nBest of luck 🍀");
 }
 </script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b5cff"><script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js");
+    });
+  }
+</script>
+
