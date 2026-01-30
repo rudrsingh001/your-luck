@@ -4,20 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Spin & Win</title>
-
   <style>
     body{margin:0;font-family:Arial;background:#0b66ff}
     .box{max-width:520px;margin:20px auto;background:#fff;border-radius:14px;padding:16px}
     .row{display:flex;justify-content:space-between;align-items:center}
     .pill{background:#eef3ff;padding:8px 12px;border-radius:999px}
-    canvas{width:100%;max-width:420px;display:block;margin:15px auto}
+    canvas{width:100%;max-width:420px;display:block;margin:12px auto}
     button{padding:12px 16px;border:0;border-radius:10px;background:#28a745;color:#fff;font-size:16px}
     button:disabled{opacity:.6}
     .pointer{
       width:0;height:0;margin:0 auto;
       border-left:12px solid transparent;
       border-right:12px solid transparent;
-      border-top:18px solid red;
+      border-top:18px solid red; /* arrow at TOP (12 o'clock) */
     }
     .muted{font-size:13px;color:#555;text-align:center}
   </style>
@@ -41,46 +40,35 @@
 
 <script>
 /* ================= COINS ================= */
-function getCoins(){
-  return parseInt(localStorage.getItem("coins") || "0");
-}
-function setCoins(v){
-  localStorage.setItem("coins", v);
-}
-document.getElementById("coins").innerText = getCoins();
+const getCoins=()=>parseInt(localStorage.getItem("coins")||"0");
+const setCoins=v=>localStorage.setItem("coins",v);
+document.getElementById("coins").innerText=getCoins();
 
-/* ================= DAILY SPIN LIMIT ================= */
-const MAX_SPINS = 3;
-
-function today(){
-  const d=new Date();
-  return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
-}
+/* ================= DAILY LIMIT ================= */
+const MAX_SPINS=3;
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
 function getSpinData(){
   const d=JSON.parse(localStorage.getItem("spinData")||"{}");
   if(d.date!==today()) return {date:today(),count:0};
   return d;
 }
-function saveSpinData(d){
-  localStorage.setItem("spinData",JSON.stringify(d));
-}
-function spinsLeft(){
-  return Math.max(0, MAX_SPINS - getSpinData().count);
-}
-document.getElementById("spinsLeft").innerText = spinsLeft();
+function saveSpinData(d){localStorage.setItem("spinData",JSON.stringify(d));}
+const spinsLeft=()=>Math.max(0,MAX_SPINS-getSpinData().count);
+document.getElementById("spinsLeft").innerText=spinsLeft();
 
-/* ================= SEGMENTS (WEIGHTED) ================= */
+/* ================= SEGMENTS (8 only) ================= */
 const segments=[
-  {label:"5",coins:5,weight:40},
-  {label:"10",coins:10,weight:35},
-  {label:"15",coins:15,weight:8},
-  {label:"20",coins:20,weight:6},
-  {label:"25",coins:25,weight:4},
-  {label:"50",coins:50,weight:3},
-  {label:"100",coins:100,weight:2},
-  {label:"1000",coins:1000,weight:1}
+  {label:"5",coins:5},
+  {label:"10",coins:10},
+  {label:"15",coins:15},
+  {label:"20",coins:20},
+  {label:"25",coins:25},
+  {label:"50",coins:50},
+  {label:"100",coins:100},
+  {label:"1000",coins:1000}
 ];
 
+/* ================= CANVAS ================= */
 const canvas=document.getElementById("wheel");
 const ctx=canvas.getContext("2d");
 const cx=250,cy=250,radius=220;
@@ -89,53 +77,48 @@ const slice=(Math.PI*2)/segments.length;
 function draw(rot){
   ctx.clearRect(0,0,500,500);
   for(let i=0;i<segments.length;i++){
-    const s=rot+i*slice,e=s+slice;
+    const start=rot+i*slice;
+    const end=start+slice;
+
     ctx.beginPath();
     ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,radius,s,e);
+    ctx.arc(cx,cy,radius,start,end);
     ctx.fillStyle=i%2?"#dbe6ff":"#f2f6ff";
     ctx.fill();
 
     ctx.save();
     ctx.translate(cx,cy);
-    ctx.rotate(s+slice/2);
+    ctx.rotate(start+slice/2);
     ctx.textAlign="right";
     ctx.font="bold 20px Arial";
     ctx.fillStyle="#000";
-    ctx.fillText(segments[i].label,radius-15,5);
+    ctx.fillText(segments[i].label,radius-15,6);
     ctx.restore();
   }
 }
 let currentRot=0;
 draw(currentRot);
 
+/* ================= HELPERS ================= */
+// Arrow is at TOP (12 o'clock). Calculate which slice is under arrow.
+function winningIndexFromRotation(rot){
+  const normalized=(Math.PI*2-(rot%(Math.PI*2)))%(Math.PI*2);
+  return Math.floor(normalized/slice)%segments.length;
+}
+
 /* ================= AD TIMER (ONLY 1st SPIN) ================= */
+const msg=document.getElementById("msg");
 function watchAdThen(cb){
   let sec=30;
   msg.innerText="📺 Ad dekh rahe ho... "+sec+" sec";
   const t=setInterval(()=>{
-    sec--;
-    msg.innerText="📺 Ad dekh rahe ho... "+sec+" sec";
-    if(sec<=0){
-      clearInterval(t);
-      cb();
-    }
+    sec--; msg.innerText="📺 Ad dekh rahe ho... "+sec+" sec";
+    if(sec<=0){clearInterval(t); cb();}
   },1000);
 }
 
-/* ================= SPIN LOGIC ================= */
-function pickIndex(){
-  let total=segments.reduce((s,x)=>s+x.weight,0);
-  let r=Math.random()*total;
-  for(let i=0;i<segments.length;i++){
-    r-=segments[i].weight;
-    if(r<=0) return i;
-  }
-  return 0;
-}
-
+/* ================= SPIN ================= */
 const btn=document.getElementById("spinBtn");
-const msg=document.getElementById("msg");
 let spinning=false;
 
 btn.onclick=()=>{
@@ -147,17 +130,17 @@ btn.onclick=()=>{
     return;
   }
 
-  function startSpin(){
-    spinning=true;
-    btn.disabled=true;
-    data.count++;
-    saveSpinData(data);
+  const startSpin=()=>{
+    spinning=true; btn.disabled=true;
+    data.count++; saveSpinData(data);
     document.getElementById("spinsLeft").innerText=spinsLeft();
 
-    const winIndex=pickIndex();
-    const target=(Math.PI*2*6)+(winIndex*slice)+(slice/2);
-    const start=performance.now(),dur=3000;
+    // FAIR random rotation (no pre-pick)
+    const spins=6+Math.floor(Math.random()*3); // 6–8
+    const randomOffset=Math.random()*slice;   // anywhere in a slice
+    const target=currentRot + spins*2*Math.PI + randomOffset;
 
+    const start=performance.now(),dur=3200;
     function anim(t){
       const p=Math.min(1,(t-start)/dur);
       const ease=1-Math.pow(1-p,3);
@@ -166,23 +149,24 @@ btn.onclick=()=>{
       if(p<1) requestAnimationFrame(anim);
       else{
         currentRot=target;
-        const win=segments[winIndex];
+        draw(currentRot);
+
+        // 🔥 FINAL: arrow ke niche jo hai wahi reward
+        const idx=winningIndexFromRotation(currentRot);
+        const win=segments[idx];
         setCoins(getCoins()+win.coins);
         document.getElementById("coins").innerText=getCoins();
         msg.innerText="🎉 You won "+win.coins+" coins";
-        spinning=false;
-        btn.disabled=false;
+
+        spinning=false; btn.disabled=false;
       }
     }
     requestAnimationFrame(anim);
-  }
+  };
 
-  // 🔥 1st spin = AD REQUIRED
-  if(data.count===0){
-    watchAdThen(startSpin);
-  }else{
-    startSpin();
-  }
+  // 1st spin requires ad
+  if(data.count===0) watchAdThen(startSpin);
+  else startSpin();
 };
 </script>
 </body>
