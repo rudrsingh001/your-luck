@@ -55,6 +55,20 @@ const url =
 
 window.open(url, "_blank");
 document.getElementById("msg").innerText = "✅ Form opened. Submit to request withdrawal.";
+db.collection("withdraw_requests").add({
+  name: name,
+  upi: upi,
+  coins: wcoins,
+  amount: wcoins / 10,
+  status: "pending",
+  createdAt: new Date().toISOString()
+})
+.then(() => {
+  document.getElementById("msg").innerText = "✅ Request submitted (Pending).";
+})
+.catch((err) => {
+  document.getElementById("msg").innerText = "❌ Error: " + err.message;
+});
 
 
     if(!name || !upi || !wcoins){
