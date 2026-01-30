@@ -179,3 +179,60 @@ btn.addEventListener("click", () => {
 
 </body>
 </html>
+// ===== DAILY SPIN LIMIT (MAX 5) =====
+const MAX_SPINS_PER_DAY = 5;
+
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+}
+
+function getSpinData(){
+  const saved = localStorage.getItem("spinData");
+  if(!saved){
+    return { date: todayKey(), count: 0 };
+  }
+  return JSON.parse(saved);
+}
+
+function saveSpinData(data){
+  localStorage.setItem("spinData", JSON.stringify(data));
+}
+
+function canSpinToday(){
+  let data = getSpinData();
+  if(data.date !== todayKey()){
+    // new day → reset
+    data = { date: todayKey(), count: 0 };
+    saveSpinData(data);
+  }
+  return data.count < MAX_SPINS_PER_DAY;
+}
+
+function increaseSpinCount(){
+  const data = getSpinData();
+  data.count += 1;
+  saveSpinData(data);
+}
+
+function remainingSpins(){
+  const data = getSpinData();
+  if(data.date !== todayKey()) return MAX_SPINS_PER_DAY;
+  return Math.max(0, MAX_SPINS_PER_DAY - data.count);
+}
+                      
+btn.addEventListener("click", () => {
+
+btn.addEventListener("click", () => {
+
+  // 🔒 DAILY LIMIT CHECK
+  if(!canSpinToday()){
+    msg.innerText = "⛔ Daily limit reached (5 spins). Kal fir try karo.";
+    return;
+  }
+
+  // 👇 spin start hone se pehle count badhao
+  increaseSpinCount();
+
+  // (baaki tumhara existing spin code yahin rahega)
+document.getElementById("leftSpins").innerText = remainingSpins();
