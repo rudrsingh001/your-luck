@@ -1,238 +1,189 @@
-
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Spin & Win</title>
+
   <style>
-    body{margin:0;font-family:Arial;background:#0b66ff;color:#111}
+    body{margin:0;font-family:Arial;background:#0b66ff}
     .box{max-width:520px;margin:20px auto;background:#fff;border-radius:14px;padding:16px}
-    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .row{display:flex;justify-content:space-between;align-items:center}
     .pill{background:#eef3ff;padding:8px 12px;border-radius:999px}
-    button{padding:12px 14px;border:0;border-radius:10px;background:#28a745;color:#fff;font-size:16px}
+    canvas{width:100%;max-width:420px;display:block;margin:15px auto}
+    button{padding:12px 16px;border:0;border-radius:10px;background:#28a745;color:#fff;font-size:16px}
     button:disabled{opacity:.6}
-    canvas{width:100%;max-width:420px;height:auto;display:block;margin:14px auto}
-    .muted{color:#666;font-size:13px;line-height:1.4}
     .pointer{
       width:0;height:0;margin:0 auto;
       border-left:12px solid transparent;
       border-right:12px solid transparent;
-      border-top:18px solid #ff2d2d;
+      border-top:18px solid red;
     }
-    .center{display:flex;flex-direction:column;align-items:center}
-    a{color:#0b66ff;text-decoration:none}
+    .muted{font-size:13px;color:#555;text-align:center}
   </style>
 </head>
-<body>
 
+<body>
 <div class="box">
   <div class="row">
     <div class="pill">Coins: <b id="coins">0</b></div>
-    <div class="pill">Balance: ₹<b id="rupees">0.00</b></div>
-    <a href="index.html">⬅ Back</a>
+    <div class="pill">Spins left: <b id="spinsLeft">3</b></div>
   </div>
 
-  <div class="center">
-    <div class="pointer"></div>
-    <canvas id="wheel" width="500" height="500"></canvas>
+  <div class="pointer"></div>
+  <canvas id="wheel" width="500" height="500"></canvas>
 
-    <button id="spinBtn">Spin</button>
+  <div style="text-align:center">
+    <button id="spinBtn">SPIN</button>
     <p id="msg" class="muted"></p>
-
-    <p class="muted">
-      Fair wheel: Arrow jahan rukega, wahi reward milega.
-    </p>
   </div>
 </div>
 
 <script>
-/* ================== COINS (same storage as your app) ================== */
+/* ================= COINS ================= */
 function getCoins(){
-  return localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
+  return parseInt(localStorage.getItem("coins") || "0");
 }
 function setCoins(v){
-  localStorage.setItem("coins", String(v));
+  localStorage.setItem("coins", v);
 }
-function refreshCoinsUI(){
-  const c = getCoins();
-  document.getElementById("coins").innerText = c;
-  document.getElementById("rupees").innerText = (c/10).toFixed(2); // 10 coins = ₹1
-}
-refreshCoinsUI();
+document.getElementById("coins").innerText = getCoins();
 
-/* ================== SEGMENTS (8 boxes) ================== */
-const segments = [
-  { label: "5", coins: 5 },
-  { label: "10", coins: 10 },
-  { label: "15", coins: 15 },
-  { label: "20", coins: 20 },
-  { label: "25", coins: 25 },
-  { label: "50", coins: 50 },
-  { label: "100", coins: 100 },
-  { label: "1000", coins: 1000 }
+/* ================= DAILY SPIN LIMIT ================= */
+const MAX_SPINS = 3;
+
+function today(){
+  const d=new Date();
+  return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+}
+function getSpinData(){
+  const d=JSON.parse(localStorage.getItem("spinData")||"{}");
+  if(d.date!==today()) return {date:today(),count:0};
+  return d;
+}
+function saveSpinData(d){
+  localStorage.setItem("spinData",JSON.stringify(d));
+}
+function spinsLeft(){
+  return Math.max(0, MAX_SPINS - getSpinData().count);
+}
+document.getElementById("spinsLeft").innerText = spinsLeft();
+
+/* ================= SEGMENTS (WEIGHTED) ================= */
+const segments=[
+  {label:"5",coins:5,weight:40},
+  {label:"10",coins:10,weight:35},
+  {label:"15",coins:15,weight:8},
+  {label:"20",coins:20,weight:6},
+  {label:"25",coins:25,weight:4},
+  {label:"50",coins:50,weight:3},
+  {label:"100",coins:100,weight:2},
+  {label:"1000",coins:1000,weight:1}
 ];
 
-/* ================== CANVAS DRAW ================== */
-const canvas = document.getElementById("wheel");
-const ctx = canvas.getContext("2d");
-const cx = canvas.width/2, cy = canvas.height/2;
-const radius = 220;
-const slice = (Math.PI * 2) / segments.length;
+const canvas=document.getElementById("wheel");
+const ctx=canvas.getContext("2d");
+const cx=250,cy=250,radius=220;
+const slice=(Math.PI*2)/segments.length;
 
-function drawWheel(rotation=0){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
+function draw(rot){
+  ctx.clearRect(0,0,500,500);
   for(let i=0;i<segments.length;i++){
-    const start = rotation + i*slice;
-    const end = start + slice;
-
+    const s=rot+i*slice,e=s+slice;
     ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, start, end);
-    ctx.closePath();
-    ctx.fillStyle = (i%2===0) ? "#f2f6ff" : "#dbe6ff";
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,radius,s,e);
+    ctx.fillStyle=i%2?"#dbe6ff":"#f2f6ff";
     ctx.fill();
 
     ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(start + slice/2);
-    ctx.textAlign = "right";
-    ctx.fillStyle = "#111";
-    ctx.font = "bold 20px Arial";
-    ctx.fillText(segments[i].label, radius - 18, 8);
+    ctx.translate(cx,cy);
+    ctx.rotate(s+slice/2);
+    ctx.textAlign="right";
+    ctx.font="bold 20px Arial";
+    ctx.fillStyle="#000";
+    ctx.fillText(segments[i].label,radius-15,5);
     ctx.restore();
   }
-
-  // center hub
-  ctx.beginPath();
-  ctx.arc(cx, cy, 50, 0, Math.PI*2);
-  ctx.fillStyle = "#ffffff";
-  ctx.fill();
-  ctx.strokeStyle = "#cccccc";
-  ctx.stroke();
-
-  ctx.fillStyle = "#111";
-  ctx.font = "bold 16px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText("SPIN", cx, cy+6);
 }
+let currentRot=0;
+draw(currentRot);
 
-let currentRotation = 0;
-drawWheel(currentRotation);
-
-/* ================== SPIN LOGIC ================== */
-let spinning = false;
-const btn = document.getElementById("spinBtn");
-const msg = document.getElementById("msg");
-
-// Helper: arrow TOP (12 o'clock) ke niche ka segment index
-function getWinningIndex(rotation){
-  // normalize angle to [0, 2π)
-  const normalized = (Math.PI*2 - (rotation % (Math.PI*2))) % (Math.PI*2);
-  return Math.floor(normalized / slice) % segments.length;
-}
-
-btn.addEventListener("click", () => {
-  if(spinning) return;
-  spinning = true;
-  btn.disabled = true;
-  msg.innerText = "Spinning...";
-
-  // random spins + random stop (FAIR)
-  const spins = 6 + Math.floor(Math.random()*3); // 6–8 full spins
-  const randomOffset = Math.random() * slice;    // anywhere inside a slice
-  const targetRotation = currentRotation + spins*2*Math.PI + randomOffset;
-
-  const start = performance.now();
-  const duration = 3200;
-
-  function animate(t){
-    const p = Math.min(1, (t - start)/duration);
-    const ease = 1 - Math.pow(1-p, 3); // easeOutCubic
-    const rot = currentRotation + (targetRotation - currentRotation) * ease;
-    drawWheel(rot);
-
-    if(p < 1){
-      requestAnimationFrame(animate);
-    } else {
-      // snap to final
-      currentRotation = targetRotation;
-      drawWheel(currentRotation);
-
-      // 🔥 FINAL: arrow ke niche jo segment, wahi reward
-      const winIndex = getWinningIndex(currentRotation);
-      const win = segments[winIndex];
-
-      setCoins(getCoins() + win.coins);
-      refreshCoinsUI();
-
-      msg.innerText = `🎉 You won ${win.coins} coins!`;
-      spinning = false;
-      btn.disabled = false;
+/* ================= AD TIMER (ONLY 1st SPIN) ================= */
+function watchAdThen(cb){
+  let sec=30;
+  msg.innerText="📺 Ad dekh rahe ho... "+sec+" sec";
+  const t=setInterval(()=>{
+    sec--;
+    msg.innerText="📺 Ad dekh rahe ho... "+sec+" sec";
+    if(sec<=0){
+      clearInterval(t);
+      cb();
     }
+  },1000);
+}
+
+/* ================= SPIN LOGIC ================= */
+function pickIndex(){
+  let total=segments.reduce((s,x)=>s+x.weight,0);
+  let r=Math.random()*total;
+  for(let i=0;i<segments.length;i++){
+    r-=segments[i].weight;
+    if(r<=0) return i;
   }
-
-  requestAnimationFrame(animate);
-});
-</script>
-
-</body>
-</html>
-// ===== DAILY SPIN LIMIT (MAX 5) =====
-const MAX_SPINS_PER_DAY = 5;
-
-function todayKey(){
-  const d = new Date();
-  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+  return 0;
 }
 
-function getSpinData(){
-  const saved = localStorage.getItem("spinData");
-  if(!saved){
-    return { date: todayKey(), count: 0 };
-  }
-  return JSON.parse(saved);
-}
+const btn=document.getElementById("spinBtn");
+const msg=document.getElementById("msg");
+let spinning=false;
 
-function saveSpinData(data){
-  localStorage.setItem("spinData", JSON.stringify(data));
-}
+btn.onclick=()=>{
+  if(spinning) return;
 
-function canSpinToday(){
-  let data = getSpinData();
-  if(data.date !== todayKey()){
-    // new day → reset
-    data = { date: todayKey(), count: 0 };
-    saveSpinData(data);
-  }
-  return data.count < MAX_SPINS_PER_DAY;
-}
-
-function increaseSpinCount(){
-  const data = getSpinData();
-  data.count += 1;
-  saveSpinData(data);
-}
-
-function remainingSpins(){
-  const data = getSpinData();
-  if(data.date !== todayKey()) return MAX_SPINS_PER_DAY;
-  return Math.max(0, MAX_SPINS_PER_DAY - data.count);
-}
-                      
-btn.addEventListener("click", () => {
-
-btn.addEventListener("click", () => {
-
-  // 🔒 DAILY LIMIT CHECK
-  if(!canSpinToday()){
-    msg.innerText = "⛔ Daily limit reached (5 spins). Kal fir try karo.";
+  let data=getSpinData();
+  if(data.count>=MAX_SPINS){
+    msg.innerText="⛔ Daily limit over. Kal aana.";
     return;
   }
 
-  // 👇 spin start hone se pehle count badhao
-  increaseSpinCount();
+  function startSpin(){
+    spinning=true;
+    btn.disabled=true;
+    data.count++;
+    saveSpinData(data);
+    document.getElementById("spinsLeft").innerText=spinsLeft();
 
-  // (baaki tumhara existing spin code yahin rahega)
-document.getElementById("leftSpins").innerText = remainingSpins();
+    const winIndex=pickIndex();
+    const target=(Math.PI*2*6)+(winIndex*slice)+(slice/2);
+    const start=performance.now(),dur=3000;
+
+    function anim(t){
+      const p=Math.min(1,(t-start)/dur);
+      const ease=1-Math.pow(1-p,3);
+      const rot=currentRot+(target-currentRot)*ease;
+      draw(rot);
+      if(p<1) requestAnimationFrame(anim);
+      else{
+        currentRot=target;
+        const win=segments[winIndex];
+        setCoins(getCoins()+win.coins);
+        document.getElementById("coins").innerText=getCoins();
+        msg.innerText="🎉 You won "+win.coins+" coins";
+        spinning=false;
+        btn.disabled=false;
+      }
+    }
+    requestAnimationFrame(anim);
+  }
+
+  // 🔥 1st spin = AD REQUIRED
+  if(data.count===0){
+    watchAdThen(startSpin);
+  }else{
+    startSpin();
+  }
+};
+</script>
+</body>
+</html>
