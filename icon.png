@@ -1,2 +1,16 @@
 
-icon.png
+{
+  "name": "Luck App",
+  "short_name": "Luck",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0d6efd",
+  "theme_color": "#0d6efd",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "1092x1092",
+      "type": "image/png"
+    }
+  ]
+}
