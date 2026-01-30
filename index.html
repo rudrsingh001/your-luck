@@ -466,3 +466,28 @@ function watchAd() {
     };
   });
 </script>
+<button id="installBtn"
+  style="position:fixed;bottom:120px;right:12px;
+  padding:12px 14px;border-radius:12px;
+  background:#ff5722;color:#fff;border:0;z-index:99999;display:none;">
+  Install App
+</button>
+
+<script>
+  let deferredPrompt;
+  const installBtn = document.getElementById("installBtn");
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = "block";
+  });
+
+  installBtn.addEventListener("click", async () => {
+    installBtn.style.display = "none";
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
+</script>
