@@ -157,3 +157,21 @@ function notifyAdmin(name, upi, coins){
     })
   });
 }
+const ONE_HOUR = 60 * 60 * 1000;
+
+function canWithdrawNow(){
+  const last = localStorage.getItem("lastWithdrawTime");
+  if(!last) return true;
+
+  const diff = Date.now() - parseInt(last);
+  return diff >= ONE_HOUR;
+}
+if(!canWithdrawNow()){
+  msg.innerText = "⏳ Please wait 1 hour before next withdrawal request.";
+  return;
+}
+localStorage.setItem("lastWithdrawTime", Date.now());
+msg.innerText =
+"✅ Withdrawal request received.\n" +
+"⏳ Processing time: within 1 hour.\n" +
+"💳 Payment will be sent via UPI.";
