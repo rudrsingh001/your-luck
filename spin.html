@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html>
 <head>
@@ -25,185 +26,156 @@
 </head>
 <body>
 
-  <div class="box">
-    <div class="row">
-      <div class="pill">Coins: <b id="coins">0</b></div>
-      <div class="pill">Balance: ₹<b id="rupees">0.00</b></div>
-      <a href="index.html">⬅ Back</a>
-    </div>
-
-    <div class="center">
-      <div class="pointer"></div>
-      <canvas id="wheel" width="500" height="500"></canvas>
-
-      <button id="spinBtn">Spin (1 time)</button>
-      <p id="msg" class="muted"></p>
-
-      <p class="muted">
-        Note: Testing mode me 5/10 ka chance zyada hai, high rewards rare hain.
-      </p>
-    </div>
+<div class="box">
+  <div class="row">
+    <div class="pill">Coins: <b id="coins">0</b></div>
+    <div class="pill">Balance: ₹<b id="rupees">0.00</b></div>
+    <a href="index.html">⬅ Back</a>
   </div>
 
+  <div class="center">
+    <div class="pointer"></div>
+    <canvas id="wheel" width="500" height="500"></canvas>
+
+    <button id="spinBtn">Spin</button>
+    <p id="msg" class="muted"></p>
+
+    <p class="muted">
+      Fair wheel: Arrow jahan rukega, wahi reward milega.
+    </p>
+  </div>
+</div>
+
 <script>
-  // ===== Coins helpers (same system as your app) =====
-  function getCoins(){
-    return localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
-  }
-  function setCoins(v){
-    localStorage.setItem("coins", String(v));
-  }
-  function refreshCoinsUI(){
-    const c = getCoins();
-    document.getElementById("coins").innerText = c;
-    document.getElementById("rupees").innerText = (c/10).toFixed(2); // 10 coins = ₹1
-  }
-  refreshCoinsUI();
+/* ================== COINS (same storage as your app) ================== */
+function getCoins(){
+  return localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
+}
+function setCoins(v){
+  localStorage.setItem("coins", String(v));
+}
+function refreshCoinsUI(){
+  const c = getCoins();
+  document.getElementById("coins").innerText = c;
+  document.getElementById("rupees").innerText = (c/10).toFixed(2); // 10 coins = ₹1
+}
+refreshCoinsUI();
 
-  // ===== Wheel segments (8) =====
-  const segments = [
-    { label: "5",    coins: 5,    weight: 45 },
-    { label: "10",   coins: 10,   weight: 40 },
-    { label: "15",   coins: 15,   weight: 6  },
-    { label: "20",   coins: 20,   weight: 4  },
-    { label: "25",   coins: 25,   weight: 2  },
-    { label: "50",   coins: 50,   weight: 1  },
-    { label: "100",  coins: 100,  weight: 0.5},
-    { label: "🎧 1000", coins: 1000, weight: 0.5 } // earbuds/jackpot
-  ];
+/* ================== SEGMENTS (8 boxes) ================== */
+const segments = [
+  { label: "5", coins: 5 },
+  { label: "10", coins: 10 },
+  { label: "15", coins: 15 },
+  { label: "20", coins: 20 },
+  { label: "25", coins: 25 },
+  { label: "50", coins: 50 },
+  { label: "100", coins: 100 },
+  { label: "🎧 1000", coins: 1000 }
+];
 
-  // ===== Weighted random pick (fair but controlled odds) =====
-  function weightedPickIndex(items){
-    const total = items.reduce((s,x)=>s + x.weight, 0);
-    let r = Math.random() * total;
-    for(let i=0;i<items.length;i++){
-      r -= items[i].weight;
-      if(r <= 0) return i;
-    }
-    return items.length - 1;
-  }
+/* ================== CANVAS DRAW ================== */
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+const cx = canvas.width/2, cy = canvas.height/2;
+const radius = 220;
+const slice = (Math.PI * 2) / segments.length;
 
-  // ===== Draw wheel =====
-  const canvas = document.getElementById("wheel");
-  const ctx = canvas.getContext("2d");
-  const cx = canvas.width/2, cy = canvas.height/2;
-  const radius = 220;
-  const slice = (Math.PI * 2) / segments.length;
+function drawWheel(rotation=0){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  function drawWheel(rotation=0){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<segments.length;i++){
+    const start = rotation + i*slice;
+    const end = start + slice;
 
-    for(let i=0;i<segments.length;i++){
-      const start = rotation + i*slice;
-      const end = start + slice;
-
-      // alternating colors (simple)
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, radius, start, end);
-      ctx.closePath();
-      ctx.fillStyle = (i%2===0) ? "#f2f6ff" : "#dbe6ff";
-      ctx.fill();
-
-      // text
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(start + slice/2);
-      ctx.textAlign = "right";
-      ctx.fillStyle = "#111";
-      ctx.font = "bold 20px Arial";
-      ctx.fillText(segments[i].label, radius - 18, 8);
-      ctx.restore();
-    }
-
-    // center circle
     ctx.beginPath();
-    ctx.arc(cx, cy, 50, 0, Math.PI*2);
-    ctx.fillStyle = "#ffffff";
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, start, end);
+    ctx.closePath();
+    ctx.fillStyle = (i%2===0) ? "#f2f6ff" : "#dbe6ff";
     ctx.fill();
-    ctx.strokeStyle = "#cccccc";
-    ctx.stroke();
 
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + slice/2);
+    ctx.textAlign = "right";
     ctx.fillStyle = "#111";
-    ctx.font = "bold 16px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("SPIN", cx, cy+6);
+    ctx.font = "bold 20px Arial";
+    ctx.fillText(segments[i].label, radius - 18, 8);
+    ctx.restore();
   }
 
-  let rot = 0;
-  drawWheel(rot);
+  // center hub
+  ctx.beginPath();
+  ctx.arc(cx, cy, 50, 0, Math.PI*2);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+  ctx.strokeStyle = "#cccccc";
+  ctx.stroke();
 
-  // ===== Spin logic (1 spin per hour optional) =====
-  // For testing: 1 spin per page load.
-  let spinning = false;
+  ctx.fillStyle = "#111";
+  ctx.font = "bold 16px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("SPIN", cx, cy+6);
+}
 
-  function angleToIndex(finalRotation){
-    // Pointer is at TOP (12 o'clock).
-    // Compute which slice is at the top after rotation.
-    const normalized = (Math.PI*2 - (finalRotation % (Math.PI*2))) % (Math.PI*2);
-    const idx = Math.floor(normalized / slice) % segments.length;
-    return idx;
-  }
+let currentRotation = 0;
+drawWheel(currentRotation);
 
-  const btn = document.getElementById("spinBtn");
-  const msg = document.getElementById("msg");
+/* ================== SPIN LOGIC ================== */
+let spinning = false;
+const btn = document.getElementById("spinBtn");
+const msg = document.getElementById("msg");
 
-  btn.addEventListener("click", () => {
-    if(spinning) return;
-    spinning = true;
-    btn.disabled = true;
-    msg.innerText = "Spinning...";
+// Helper: arrow TOP (12 o'clock) ke niche ka segment index
+function getWinningIndex(rotation){
+  // normalize angle to [0, 2π)
+  const normalized = (Math.PI*2 - (rotation % (Math.PI*2))) % (Math.PI*2);
+  return Math.floor(normalized / slice) % segments.length;
+}
 
-    // choose result index (weighted)
-    const winIndex = weightedPickIndex(segments);
+btn.addEventListener("click", () => {
+  if(spinning) return;
+  spinning = true;
+  btn.disabled = true;
+  msg.innerText = "Spinning...";
 
-    // We want wheel to stop on that index at pointer:
-    // target angle such that that slice center aligns to top.
-    const targetCenter = (winIndex * slice) + (slice/2);
-    const targetRotation = (Math.PI*2 - targetCenter);
+  // random spins + random stop (FAIR)
+  const spins = 6 + Math.floor(Math.random()*3); // 6–8 full spins
+  const randomOffset = Math.random() * slice;    // anywhere inside a slice
+  const targetRotation = currentRotation + spins*2*Math.PI + randomOffset;
 
-    // add extra spins
-    const extraSpins = 6 + Math.floor(Math.random()*3); // 6-8 spins
-    const finalRot = targetRotation + extraSpins * Math.PI * 2;
+  const start = performance.now();
+  const duration = 3200;
 
-    const start = performance.now();
-    const duration = 3200; // ms
+  function animate(t){
+    const p = Math.min(1, (t - start)/duration);
+    const ease = 1 - Math.pow(1-p, 3); // easeOutCubic
+    const rot = currentRotation + (targetRotation - currentRotation) * ease;
+    drawWheel(rot);
 
-    function animate(t){
-      const p = Math.min(1, (t - start)/duration);
-      // easeOutCubic
-      const ease = 1 - Math.pow(1-p, 3);
+    if(p < 1){
+      requestAnimationFrame(animate);
+    } else {
+      // snap to final
+      currentRotation = targetRotation;
+      drawWheel(currentRotation);
 
-      rot = rot + (finalRot - rot) * 0.08; // smooth towards target
-      // Better: direct interpolation
-      rot = (1-ease) * rot + ease * finalRot;
+      // 🔥 FINAL: arrow ke niche jo segment, wahi reward
+      const winIndex = getWinningIndex(currentRotation);
+      const win = segments[winIndex];
 
-      drawWheel(rot);
+      setCoins(getCoins() + win.coins);
+      refreshCoinsUI();
 
-      if(p < 1){
-        requestAnimationFrame(animate);
-      } else {
-        // snap to final
-        rot = finalRot;
-        drawWheel(rot);
-
-        // award coins based on chosen index (not computed)
-        const win = segments[winIndex];
-        const current = getCoins();
-        setCoins(current + win.coins);
-        refreshCoinsUI();
-
-        msg.innerText = `🎉 You won ${win.coins} coins!`;
-        spinning = false;
-        // For strict: keep disabled (1 spin). For testing you can enable after 10 sec.
-        // btn.disabled = false;
-      }
+      msg.innerText = `🎉 You won ${win.coins} coins!`;
+      spinning = false;
+      btn.disabled = false;
     }
+  }
 
-    requestAnimationFrame(animate);
-  });
+  requestAnimationFrame(animate);
+});
 </script>
 
 </body>
 </html>
-
