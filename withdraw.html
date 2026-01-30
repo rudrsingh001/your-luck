@@ -39,26 +39,75 @@ c<!doctype html>
   <script src="https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore-compat.js"></script>
 
   <script>
-    // ✅ coins load
-    let coins = localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
-    document.getElementById("coins").innerText = coins;
-    document.getElementById("rupees").innerText = (coins/10).toFixed(2);
+    <script>
+  // ✅ coins load
+  let coins = localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("rupees").innerText = (coins/10).toFixed(2);
 
-    // ✅ 1) PASTE YOUR firebaseConfig HERE
-    
+  // ✅ 1) FIREBASE CONFIG (YAHAN)
+  const firebaseConfig = {
+    apiKey: "AIzaSyD-REAL-KEY",
+    authDomain: "yoursluck.firebaseapp.com",
+    projectId: "yoursluck",
+    storageBucket: "yoursluck.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abc123"
+  };
 
-    // ✅ 2) init firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  // ✅ 2) init firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-    // ✅ 3) submit withdraw request
-    function submitWithdraw() {
-      const name = document.getElementById("name").value.trim();
-      const upi = document.getElementById("upi").value.trim();
-      const wcoins = parseInt(document.getElementById("wcoins").value);
+  // ✅ 3) submit withdraw request
+  function submitWithdraw() {
+    const name = document.getElementById("name").value.trim();
+    const upi = document.getElementById("upi").value.trim();
+    const wcoins = parseInt(document.getElementById("wcoins").value);
 
-      const msg = document.getElementById("msg");
-      const btn = document.getElementById("btn");
+    const msg = document.getElementById("msg");
+    const btn = document.getElementById("btn");
+
+    if (!name || !upi || !wcoins) {
+      msg.innerText = "❌ Please fill all fields";
+      return;
+    }
+    if (wcoins < 100) {
+      msg.innerText = "❌ Minimum 100 coins required";
+      return;
+    }
+    if (wcoins > coins) {
+      msg.innerText = "❌ You don't have enough coins";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Submitting...";
+    msg.innerText = "⏳ Please wait...";
+
+    db.collection("withdraw_requests").add({
+      name: name,
+      upi: upi,
+      coins: wcoins,
+      amount: wcoins / 10,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+      userAgent: navigator.userAgent
+    })
+    .then(() => {
+      msg.innerText = "✅ Request submitted! Status: Pending";
+      btn.disabled = false;
+      btn.innerText = "Request Withdrawal";
+      document.getElementById("wcoins").value = "";
+    })
+    .catch((err) => {
+      msg.innerText = "❌ Error: " + err.message;
+      btn.disabled = false;
+      btn.innerText = "Request Withdrawal";
+    });
+  }
+</script>
+
 
       if (!name || !upi || !wcoins) {
         msg.innerText = "❌ Please fill all fields";
