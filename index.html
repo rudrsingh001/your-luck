@@ -394,3 +394,29 @@ if ("serviceWorker" in navigator) {
     padding-bottom: 90px;
   }
 </style>
+<button onclick="watchAd()">Watch Ad & Earn Coin</button>
+<p>Coins: <span id="coins">0</span></p>
+<p id="msg"></p>
+<script>
+let coins = 0;
+let adWatching = false;
+
+function watchAd() {
+  if (adWatching) return;
+
+  adWatching = true;
+  document.getElementById("msg").innerText =
+    "Ad dekh rahe ho… 30 sec rukna hoga";
+
+  // 👉 Yahan tum ad section scroll / show karwa do
+  window.scrollTo(0, document.body.scrollHeight);
+
+  setTimeout(() => {
+    coins++;
+    document.getElementById("coins").innerText = coins;
+    document.getElementById("msg").innerText =
+      "🎉 1 Reward Coin mil gaya!";
+    adWatching = false;
+  }, 30000); // 30 seconds
+}
+</script>
