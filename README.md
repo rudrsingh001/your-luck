@@ -1,2 +1,0 @@
-# your-luck
-index.html
