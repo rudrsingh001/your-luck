@@ -1,1 +1,75 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Withdraw</title>
+  <style>
+    body{font-family:Arial;margin:0;background:#0b66ff;color:#111}
+    .box{max-width:420px;margin:40px auto;background:#fff;border-radius:12px;padding:18px}
+    input,button{width:100%;padding:12px;margin:8px 0;font-size:16px}
+    button{background:#28a745;color:#fff;border:0;border-radius:8px}
+    .muted{color:#666;font-size:14px}
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>Withdraw Coins</h2>
+
+    <p><b>Coins:</b> <span id="coins">0</span></p>
+    <p><b>Balance:</b> ₹<span id="rupees">0</span></p>
+
+    <p class="muted">Rule: 10 Coins = ₹1 | Minimum withdraw: 100 coins (₹10)</p>
+
+    <input id="name" placeholder="Your Name" />
+    <input id="upi" placeholder="Your UPI ID (example: name@upi)" />
+    <input id="wcoins" type="number" placeholder="Coins to Withdraw (min 100)" />
+
+    <button onclick="submitWithdraw()">Request Withdrawal</button>
+
+    <p id="msg" class="muted"></p>
+
+    <hr>
+    <a href="index.html">⬅ Back to Home</a>
+  </div>
+
+<script>
+  // load coins
+  let coins = localStorage.getItem("coins") ? parseInt(localStorage.getItem("coins")) : 0;
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("rupees").innerText = (coins/10).toFixed(2);
+
+  function submitWithdraw(){
+    const name = document.getElementById("name").value.trim();
+    const upi = document.getElementById("upi").value.trim();
+    const wcoins = parseInt(document.getElementById("wcoins").value);
+
+    if(!name || !upi || !wcoins){
+      document.getElementById("msg").innerText = "❌ Please fill all fields";
+      return;
+    }
+    if(wcoins < 100){
+      document.getElementById("msg").innerText = "❌ Minimum 100 coins required";
+      return;
+    }
+    if(wcoins > coins){
+      document.getElementById("msg").innerText = "❌ You don't have enough coins";
+      return;
+    }
+
+    // ✅ IMPORTANT: yahan real submit backend chahiye
+    // For now: copy message + show instruction
+    const text = `WITHDRAW REQUEST\nName: ${name}\nUPI: ${upi}\nCoins: ${wcoins}\nAmount: ₹${(wcoins/10).toFixed(2)}`;
+    navigator.clipboard?.writeText(text);
+
+    document.getElementById("msg").innerText =
+      "✅ Request created! (Copied). Abhi backend add karna hai (Google Form/Firebase)";
+
+    // optional: temporarily deduct coins after admin approves (recommended)
+    // abhi deduct mat karo, warna fake requests me coins cut ho jayenge
+  }
+</script>
+</body>
+</html>
 
