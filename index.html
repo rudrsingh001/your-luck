@@ -34,6 +34,8 @@ function askAdmin() {
     "Winner: " + winner.name + " (" + winner.mobile + ")";
 }
 </script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b66ff">
 
 </button>
 <a href="spin.html">
@@ -148,6 +150,11 @@ function showList() {
   alert("🎉 Aap lucky draw me successfully include ho gaye ho!");
   window.location.href = "form.html";
 }
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+  }
+</script>
 
 </script>
 <script>
@@ -426,3 +433,36 @@ function watchAd() {
 <a href="withdraw.html">
   <button style="padding:10px 14px;border-radius:6px;">Withdraw</button>
 </a>
+<script>
+  let deferredPrompt;
+
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // simple popup
+    const popup = document.createElement("div");
+    popup.style = "position:fixed;bottom:80px;left:12px;right:12px;background:#fff;padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.2);z-index:99999;display:flex;gap:10px;align-items:center;justify-content:space-between;";
+    popup.innerHTML = `
+      <div>
+        <div style="font-weight:bold;">Install YourLuck App</div>
+        <div style="font-size:13px;color:#555;">Fast access & full screen experience</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button id="closePwa" style="padding:10px 12px;border-radius:10px;border:1px solid #ccc;background:#fff;">Later</button>
+        <button id="installPwa" style="padding:10px 12px;border-radius:10px;border:0;background:#28a745;color:#fff;">Install</button>
+      </div>
+    `;
+    document.body.appendChild(popup);
+
+    document.getElementById("closePwa").onclick = () => popup.remove();
+
+    document.getElementById("installPwa").onclick = async () => {
+      popup.remove();
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+    };
+  });
+</script>
