@@ -72,3 +72,10 @@
 </html>
 <link rel="manifest" href="/your-luck/manifest.json">
 <meta name="theme-color" content="#0d6efd">
+setTimeout(() => {
+  const hasSW = "serviceWorker" in navigator;
+  const controlled = !!navigator.serviceWorker.controller;
+  document.getElementById("status").innerText =
+    "SW supported: " + (hasSW ? "YES" : "NO") +
+    "\nSW controlling: " + (controlled ? "YES ✅" : "NO ❌");
+}, 2000);
