@@ -134,7 +134,7 @@
 
 </body>
 </html>
-
+</script>
 function notifyAdmin(name, upi, coins){
   const BOT_TOKEN = "PASTE_BOT_TOKEN";
   const CHAT_ID = "PASTE_CHAT_ID";
@@ -147,7 +147,7 @@ function notifyAdmin(name, upi, coins){
 💰 Amount: ₹${coins/10}
 ⏰ Time: ${new Date().toLocaleString()}
 `;
-
+</script>
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -175,3 +175,4 @@ msg.innerText =
 "✅ Withdrawal request received.\n" +
 "⏳ Processing time: within 1 hour.\n" +
 "💳 Payment will be sent via UPI.";
+</script>
