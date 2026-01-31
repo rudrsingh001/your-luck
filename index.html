@@ -1,487 +1,72 @@
-<h3>Participants</h3>
-<script>
-let tapCount = 0
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0d6efd">
-
-// secret admin unlock
-document.body.addEventListener("click", () => {
-  tapCount++;
-  if (tapCount === 7) {
-    document.getElementById("adminBtn").style.display = "block";
-    alert("Admin unlocked");
-  }
-});
-
-function askAdmin() {
-  const pass = prompt("Enter Admin Password");
-
-  if (pass !== "luck123") {
-    alert("Wrong password");
-    return;
-  }
-
-  if (participants.length === 0) {
-    document.getElementById("adminResult").innerText =
-      "No participants yet";
-    return;
-  }
-
-  const winner =
-    participants[Math.floor(Math.random() * participants.length)];
-
-  document.getElementById("adminResult").innerText =
-    "Winner: " + winner.name + " (" + winner.mobile + ")";
-}
-</script>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b66ff">
-
-</button>
-<a href="spin.html">
-  <button style="padding:10px 14px;border-radius:6px;">🎡 Spin Wheel</button>
-</a>
-
-<p id="adminResult" style="margin-top:10px;font-weight:bold;"></p>
-
-<ul id="list"></ul>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0d6efd">
-
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Your's Luck</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0d6efd;
-      color: white;
-      text-align: center;
-    }
-    .container {
-      padding: 40px 20px;
-    }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-    }
-    p {
-      font-size: 16px;
-      opacity: 0.9;
-    }
-    .box {
-      margin-top: 30px;
-      background: white;
-      color: #000;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    <div id="formBox" style="display:none; margin-top:20px;">
-  <input type="text" id="name" placeholder="Your Name"><br><br>
-  <input type="number" id="mobile" placeholder="Mobile Number"><br><br>
-  <button onclick="submitForm()">Submit</button>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YourLuck</title>
 
-  <p id="msg"></p>
-
-  <h3>Participants</h3>
-  <ul id="list"></ul>
-</div>
-
-<form onsubmit="submitForm(); return false;">
-  <input type="text" id="name" placeholder="Enter your name" required><br><br>
-
-  <input type="tel" id="mobile" placeholder="Enter mobile number" required><br><br>
-</form>
-
-<p id="msg"></p>
-
-<script>
-let participants = [];
-
-function submitForm() {
-  let name = document.getElementById("name").value;
-  let mobile = document.getElementById("mobile").value;
-
-  if (name === "" || mobile === "") {
-    alert("Please fill all details");
-    return;
-  }
-
-  participants.push({ name, mobile });
-  showList();
-
-  document.getElementById("msg").innerText =
-    "Thanks! You have successfully participated.";
-
-  document.getElementById("name").value = "";
-  document.getElementById("mobile").value = "";
-}
-
-function showList() {
-  let ul = document.getElementById("list");
-  ul.innerHTML = "";
-
-  participants.forEach((p, i) => {
-    let li = document.createElement("li");
-    li.innerText = (i + 1) + ". " + p.name + " (" + p.mobile + ")";
-    ul.appendChild(li);
-  });
-}
-</script>
-
-  </style>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d6efd">
 </head>
-<body>
 
-  <div class="container">
-    <h1>Your's Luck 🍀</h1>
-    <p>Har hour ek lucky draw</p>
-⁸
-    <div class="box">
-      <h2>Next Draw</h2>
-      <p>Time: Every 1 Hour</p>
-    <script>
-  function joinNow() 
-  {    function participate() {
-  alert("🎉 Aap lucky draw me successfully include ho gaye ho!");
-  window.location.href = "form.html";
-}
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js");
-  }
-</script>
+<body style="font-family:Arial;padding:20px;">
+  <h2>YourLuck</h2>
+  <p id="status">Loading...</p>
 
-</script>
-<script>
-  document.getElementById("joinBtn").addEventListener("click", function () {
-    let name = prompt("Enter your name");
-    if (!name) return;
+  <!-- Floating Install Button (Always Visible) -->
+  <button id="installBtn" style="
+    position:fixed;bottom:120px;right:12px;
+    padding:12px 14px;border-radius:12px;
+    background:#ff5722;color:#fff;border:0;
+    z-index:999999;font-weight:600;
+  ">
+    📲 Install App
+  </button>
 
-    let mobile = prompt("Enter your mobile number");
-    if (!mobile) return 
-  
-  });
-</script>
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
- </script>
-<div class="card">
-  <button onclick="openForm()">Participate ₹10</button>
-</div>
-<p id="timer" style="font-size:20px;font-weight:bold;"></p>
-<script>
-function pickWinner() {
-  if (participants.length === 0) {
-    alert("No participants");
-    return;
-  }
+  <script>
+    // Register service worker
+    const statusEl = document.getElementById("status");
 
-  let win = participants[Math.floor(Math.random() * participants.length)];
-  document.getElementById("winner").innerText =
-    "🎉 Winner: " + win.name;
-}
-function pickWinner() {
-  if (participants.length === 0) {
-    alert("No participants");
-    return;
-  }
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js")
+        .then(() => statusEl.innerText = "✅ SW registered. Waiting for install availability...")
+        .catch(err => statusEl.innerText = "❌ SW error: " + err.message);
+    } else {
+      statusEl.innerText = "❌ Service Worker not supported";
+    }
 
-  let win = participants[Math.floor(Math.random() * participants.length)];
-  document.getElementById("winner").innerText =
-    "🎉 Winner: " + win.name;
-}
+    // Install logic
+    let deferredPrompt = null;
+    const installBtn = document.getElementById("installBtn");
 
-</script>
-      <p id="countdown">Loading...</p>
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      statusEl.innerText = "✅ Install available! Button dabao.";
+    });
 
-<script>
-  function startCountdown() {
-    const now = new Date().getTime();
-
-    // Next full hour
-    const nextHour = new Date();
-    nextHour.setMinutes(60, 0, 0);
-
-    function updateTimer() {
-      const current = new Date().getTime();
-      const diff = nextHour - current;
-
-      if (diff <= 0) {
-        location.reload(); // hour complete hone par refresh
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) {
+        statusEl.innerText =
+          "⚠️ Install popup abhi available nahi.\n" +
+          "Check:\n" +
+          "1) GitHub Pages ON hai?\n" +
+          "2) manifest.json / service-worker.js / icons 404 nahi?\n" +
+          "3) Chrome: Site settings → Clear & reset → Reload\n" +
+          "4) 3 dots (⋮) menu me 'Install app' option check karo.";
         return;
       }
 
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      document.getElementById("countdown").innerText =
-        minutes.toString().padStart(2, "0") + ":" +
-        seconds.toString().padStart(2, "0");
-    }
-
-    updateTimer();
-    setInterval(updateTimer, 1000);
-  }
-
-  startCountdown();
-</script>
-<button id="adminBtn" onclick="askAdmin()" style="display:none;">
-  Admin Panel
-</button>
-
-<p id="adminResult"></p>
-    </script>let tapCount = 0;
-<script>
-let tapCount = 0;
-
-document.body.addEventListener("click", () => {
-  tapCount++;
-  if (tapCount === 7) {
-    document.getElementById("adminBtn").style.display = "block";
-    alert("Admin mode unlocked");
-  }
-});
-
-function askAdmin() {
-  let pass = prompt("Enter Admin Password");
-
-  if (pass !== "luck123") {
-    alert("Wrong password");
-    return;
-  }
-
-  if (participants.length === 0) {
-    document.getElementById("adminResult").innerText =
-      "No participants yet";
-    return;
-  }
-
-  let winner =
-    participants[Math.floor(Math.random() * participants.length)];
-
-  document.getElementById("adminResult").innerText =
-    "🎉 Winner: " + winner.name + " (" + winner.mobile + ")";
-}
-</script>
-
-
-  </script>
-<style> #countdown {
-  font-size: 26px;
-  font-weight: bold;
-  color: #0d6efd;
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-  <script>
-  
-</script>
-<style>
-#participateBtn {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  font-size: 18px;
-  border-radius: 10px;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-#participateBtn:active {
-  transform: scale(0.95);
-}
-</style>
-
-<script>
-let tapCount = 0
-function showSuccess() {
-  alert("🎉 Entry Successful!\nBest of luck 🍀");
-}
-</script>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b5cff"><script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js");
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      statusEl.innerText = "✅ Choice received. If not installed, try again after reload.";
     });
-  }
-</script>
 
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./service-worker.js");
-}
-</script>
-<button id="installBtn" style="
-  padding: 12px 20px;
-  font-size: 16px;
-  background: #00c853;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  display: none;
-">
-📲 Install App
-</button>
-<script>
-let deferredPrompt;
-const installBtn = document.getElementById("installBtn");
-
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = "inline-block";
-});
-
-installBtn.addEventListener("click", async () => {
-  if (!deferredPrompt) return;
-
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-
-  if (outcome === "accepted") {
-    console.log("App installed");
-  }
-
-  deferredPrompt = null;
-  installBtn.style.display = "none";
-});
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js");
-  });
-}
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js")
-    .then(() => console.log("SW registered"))
-    .catch(err => console.log("SW failed", err));
-}
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1031252617832111"
-  crossorigin="anonymous"></script>
-<!-- Bottom Fixed Ad -->
-<div id="bottom-ad" style="
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #ffffff;
-  z-index: 9999;
-  text-align: center;
-  padding: 6px 0;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
-">
-  <ins class="adsbygoogle"
-       style="display:block"
-       data-ad-client="ca-pub-1031252617832111"
-       data-ad-slot="YYYYYYYYYY"
-       data-ad-format="auto"
-       data-full-width-responsive="true"></ins>
-</div>
-
-<script>
-  (adsbygoogle = window.adsbygoogle || []).push({});
-</script>
-<style>
-  body {
-    padding-bottom: 90px;
-  }
-</style>
-<button onclick="watchAd()">Watch Ad & Earn Coin</button>
-<p>Coins: <span id="coins">0</span></p>
-<p id="msg"></p>
-<script>
-let coins = 0;
-let adWatching = false;
-
-function watchAd() {
-  if (adWatching) return;
-
-  adWatching = true;
-  document.getElementById("msg").innerText =
-    "Ad dekh rahe ho… 30 sec rukna hoga";
-
-  // 👉 Yahan tum ad section scroll / show karwa do
-  window.scrollTo(0, document.body.scrollHeight);
-
-  setTimeout(() => {
-    coins++;
-    document.getElementById("coins").innerText = coins;
-    document.getElementById("msg").innerText =
-      "🎉 1 Reward Coin mil gaya!";
-    adWatching = false;
-  }, 30000); // 30 seconds
-}
-</script>
-<a href="withdraw.html">
-  <button style="padding:10px 14px;border-radius:6px;">Withdraw</button>
-</a>
-<script>
-  
-<!-- Floating Install Button -->
-<button id="installBtn" style="
-  display:none;
-  position:fixed;
-  bottom:120px;
-  right:12px;
-  padding:12px 14px;
-  border-radius:12px;
-  background:#ff5722;
-  color:#fff;
-  border:0;
-  z-index:999999;
-  font-weight:600;
-">
-  📲 Install App
-</button>
-
-<script>
-  let deferredPrompt = null;
-  const installBtn = document.getElementById("installBtn");
-
-  // Show button when PWA install is available
-  window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = "block";
-  });
-
-  // On button click, open install prompt
-  installBtn.addEventListener("click", async () => {
-    if (!deferredPrompt) return;
-
-    installBtn.style.display = "none"; // hide after click
-    deferredPrompt.prompt();
-
-    await deferredPrompt.userChoice;   // user accepts/declines
-    deferredPrompt = null;
-  });
-
-  // If app installed, hide button
-  window.addEventListener("appinstalled", () => {
-    installBtn.style.display = "none";
-    deferredPrompt = null;
-  });
-</script>
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./service-worker.js");
-  }
-</script>
+    window.addEventListener("appinstalled", () => {
+      deferredPrompt = null;
+      statusEl.innerText = "🎉 App installed!";
+    });
+  </script>
+</body>
+</html>
