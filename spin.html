@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spin & Win</title>
+
+<style>
+body{margin:0;font-family:Arial;background:#0b66ff}
+.box{max-width:420px;margin:20px auto;background:#fff;border-radius:12px;padding:16px;text-align:center}
+canvas{width:100%;max-width:300px;margin:15px auto;display:block}
+button{padding:12px 18px;border:0;border-radius:8px;background:#28a745;color:#fff;font-size:16px}
+button:disabled{opacity:.6}
+.centerArrow{
+  width:0;height:0;
+  border-left:12px solid transparent;
+  border-right:12px solid transparent;
+  border-bottom:18px solid red;
+  margin:-10px auto 0;
+}
+.small{font-size:13px;color:#555}
+</style>
+</head>
+
+<body>
+<div class="box">
+  <h3>Spin & Win</h3>
+
+  <div>Coins: <b id="coins">0</b></div>
+  <div>Spins Left Today: <b id="left">3</b></div>
+
+  <canvas id="wheel" width="300" height="300"></canvas>
+  <div class="centerArrow"></div>
+
+  <button id="spinBtn">SPIN</button>
+  <p id="msg" class="small"></p>
+</div>
+
+<script>
+/* ---------- COINS ---------- */
+const getCoins=()=>parseInt(localStorage.getItem("coins")||"0");
+const setCoins=v=>localStorage.setItem("coins",v);
+document.getElementById("coins").innerText=getCoins();
+
+/* ---------- DAILY LIMIT ---------- */
+const MAX_SPINS=3;
+const today=()=>new Date().toDateString();
+function getSpinData(){
+  let d=JSON.parse(localStorage.getItem("spinData")||"{}");
+  if(d.date!==today()) d={date:today(),count:0};
+  return d;
+}
+function saveSpinData(d){localStorage.setItem("spinData",JSON.stringify(d));}
+function spinsLeft(){return MAX_SPINS-getSpinData().count;}
+document.getElementById("left").innerText=spinsLeft();
+
+/* ---------- SEGMENTS (7) ---------- */
+const rewards=[5,10,15,20,25,50,100];
+const canvas=document.getElementById("wheel");
+const ctx=canvas.getContext("2d");
+const cx=150,cy=150,radius=130;
+const slice=(Math.PI*2)/rewards.length;
+
+function draw(angle){
+  ctx.clearRect(0,0,300,300);
+  for(let i=0;i<rewards.length;i++){
+    const start=angle+i*slice;
+    const end=start+slice;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,radius,start,end);
+    ctx.fillStyle=i%2?"#f2f6ff":"#dbe6ff";
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(start+slice/2);
+    ctx.textAlign="right";
+    ctx.font="bold 18px Arial";
+    ctx.fillStyle="#000";
+    ctx.fillText(rewards[i],radius-10,6);
+    ctx.restore();
+  }
+}
+let rotation=0;
+draw(rotation);
+
+/* ---------- AD TIMER (2nd spin only) ---------- */
+function watchAd(cb){
+  let sec=15;
+  msg.innerText="📺 Ad... "+sec+" sec";
+  let t=setInterval(()=>{
+    sec--;
+    msg.innerText="📺 Ad... "+sec+" sec";
+    if(sec<=0){
+      clearInterval(t);
+      cb();
+    }
+  },1000);
+}
+
+/* ---------- SPIN ---------- */
+const btn=document.getElementById("spinBtn");
+const msg=document.getElementById("msg");
+let spinning=false;
+
+btn.onclick=()=>{
+  if(spinning) return;
+
+  let data=getSpinData();
+  if(data.count>=MAX_SPINS){
+    msg.innerText="⛔ Aaj ke spins khatam";
+    return;
+  }
+
+  const startSpin=()=>{
+    spinning=true;
+    btn.disabled=true;
+
+    data.count++;
+    saveSpinData(data);
+    document.getElementById("left").innerText=spinsLeft();
+
+    const extra=6+Math.random()*2;
+    const target=rotation+extra*2*Math.PI+Math.random()*slice;
+
+    const start=performance.now(),dur=2800;
+    function anim(t){
+      const p=Math.min(1,(t-start)/dur);
+      const ease=1-Math.pow(1-p,3);
+      const rot=rotation+(target-rotation)*ease;
+      draw(rot);
+      if(p<1) requestAnimationFrame(anim);
+      else{
+        rotation=target;
+        draw(rotation);
+
+        const index=Math.floor(((2*Math.PI-(rotation%(2*Math.PI)))%(2*Math.PI))/slice);
+        const win=rewards[index];
+
+        setCoins(getCoins()+win);
+        document.getElementById("coins").innerText=getCoins();
+        msg.innerText="🎉 You won "+win+" coins";
+
+        spinning=false;
+        btn.disabled=false;
+      }
+    }
+    requestAnimationFrame(anim);
+  };
+
+  // 🔥 ONLY 2nd spin shows ad
+  if(data.count===1){
+    watchAd(startSpin);
+  }else{
+    startSpin();
+  }
+};
+</script>
+</body>
+</html>
