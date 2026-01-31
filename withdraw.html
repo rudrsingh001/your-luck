@@ -134,29 +134,26 @@
 
 </body>
 </html>
-</script>
+<script>
 function notifyAdmin(name, upi, coins){
   const BOT_TOKEN = "PASTE_BOT_TOKEN";
   const CHAT_ID = "PASTE_CHAT_ID";
 
-  const text = `
-🚨 NEW WITHDRAW REQUEST
+  const text = `🚨 NEW WITHDRAW REQUEST
 👤 Name: ${name}
 💳 UPI: ${upi}
 🪙 Coins: ${coins}
 💰 Amount: ₹${coins/10}
-⏰ Time: ${new Date().toLocaleString()}
-`;
-</script>
+⏰ Time: ${new Date().toLocaleString()}`;
+
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: CHAT_ID,
-      text: text
-    })
+    body: JSON.stringify({ chat_id: CHAT_ID, text: text })
   });
 }
+</script>
+
 const ONE_HOUR = 60 * 60 * 1000;
 
 function canWithdrawNow(){
