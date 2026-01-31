@@ -434,31 +434,54 @@ function watchAd() {
   <button style="padding:10px 14px;border-radius:6px;">Withdraw</button>
 </a>
 <script>
-  <script>
-<button id="installBtn" style="display:none;position:fixed;bottom:120px;right:12px;padding:12px 14px;border-radius:12px;background:#ff5722;color:#fff;border:0;z-index:999999;">
-Install App
+  
+<!-- Floating Install Button -->
+<button id="installBtn" style="
+  display:none;
+  position:fixed;
+  bottom:120px;
+  right:12px;
+  padding:12px 14px;
+  border-radius:12px;
+  background:#ff5722;
+  color:#fff;
+  border:0;
+  z-index:999999;
+  font-weight:600;
+">
+  📲 Install App
 </button>
 
 <script>
-let deferredPrompt = null;
-const installBtn = document.getElementById("installBtn");
+  let deferredPrompt = null;
+  const installBtn = document.getElementById("installBtn");
 
-window.addEventListener("beforeinstallprompt", (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = "block";
-});
+  // Show button when PWA install is available
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = "block";
+  });
 
-installBtn.addEventListener("click", async () => {
-  installBtn.style.display = "none";
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-  deferredPrompt = null;
-});
+  // On button click, open install prompt
+  installBtn.addEventListener("click", async () => {
+    if (!deferredPrompt) return;
 
-window.addEventListener("appinstalled", () => {
-  installBtn.style.display = "none";
-  deferredPrompt = null;
-});
+    installBtn.style.display = "none"; // hide after click
+    deferredPrompt.prompt();
+
+    await deferredPrompt.userChoice;   // user accepts/declines
+    deferredPrompt = null;
+  });
+
+  // If app installed, hide button
+  window.addEventListener("appinstalled", () => {
+    installBtn.style.display = "none";
+    deferredPrompt = null;
+  });
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js");
+  }
 </script>
