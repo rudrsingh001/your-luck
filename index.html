@@ -565,3 +565,137 @@ function watchAd() {
 </div>
 
 <button id="watchAdBtn" class="btn">Watch Ad & Earn Coin</button>
+<script>
+  // ===== Reward / Anti-cheat (client-side best effort) =====
+const K = {
+  coins: "yl_coins",
+  lastAd: "yl_last_ad",
+  dailyCount: "yl_daily_count",
+  dailyDate: "yl_daily_date",
+  lock: "yl_ad_lock" // anti double-tab
+};
+
+const CFG = {
+  cooldownMs: 30 * 1000,
+  dailyLimit: 20,
+  reward: 1,
+  adSeconds: 15 // demo ad duration (15s)
+};
+
+function todayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+
+function getInt(key, def=0){
+  const v = localStorage.getItem(key);
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : def;
+}
+function setInt(key, val){ localStorage.setItem(key, String(val)); }
+
+function resetDailyIfNeeded(){
+  const t = todayKey();
+  const saved = localStorage.getItem(K.dailyDate);
+  if(saved !== t){
+    localStorage.setItem(K.dailyDate, t);
+    setInt(K.dailyCount, 0);
+  }
+}
+
+function render(){
+  document.getElementById("coins").innerText = getInt(K.coins, 0);
+}
+
+function msg(t){
+  const el = document.getElementById("adMsg");
+  if(el) el.innerText = t;
+}
+
+function acquireLock(){
+  // lock expires after 2 minutes (safety)
+  const now = Date.now();
+  const lock = getInt(K.lock, 0);
+  if(lock && (now - lock) < 2*60*1000) return false;
+  setInt(K.lock, now);
+  return true;
+}
+function releaseLock(){ localStorage.removeItem(K.lock); }
+
+async function watchAd(){
+  resetDailyIfNeeded();
+
+  const btn = document.getElementById("watchAdBtn");
+
+  // anti double click / multi tab
+  if(!acquireLock()){
+    msg("⚠️ Another request running. Please wait…");
+    return;
+  }
+
+  const now = Date.now();
+  const last = getInt(K.lastAd, 0);
+  const daily = getInt(K.dailyCount, 0);
+
+  // daily limit
+  if(daily >= CFG.dailyLimit){
+    releaseLock();
+    msg(`❌ Daily limit reached (${CFG.dailyLimit}/day). Come tomorrow.`);
+    return;
+  }
+
+  // cooldown
+  if(last && (now - last) < CFG.cooldownMs){
+    const s = Math.ceil((CFG.cooldownMs - (now - last))/1000);
+    releaseLock();
+    msg(`⏳ Wait ${s}s before next reward.`);
+    return;
+  }
+
+  // set lastAd immediately (prevents glitch)
+  setInt(K.lastAd, now);
+
+  // UI
+  if(btn){
+    btn.disabled = true;
+    btn.innerText = "Ad running…";
+  }
+
+  // demo ad timer
+  let left = CFG.adSeconds;
+  msg(`📺 Ad running… ${left}s`);
+
+  const timer = setInterval(() => {
+    left--;
+    msg(`📺 Ad running… ${left}s`);
+    if(left <= 0){
+      clearInterval(timer);
+
+      // reward
+      const coins = Math.max(0, getInt(K.coins, 0)) + CFG.reward;
+      setInt(K.coins, coins);
+
+      const newDaily = getInt(K.dailyCount, 0) + 1;
+      setInt(K.dailyCount, newDaily);
+
+      render();
+      msg(`✅ +${CFG.reward} coin! Today: ${newDaily}/${CFG.dailyLimit}`);
+
+      if(btn){
+        btn.disabled = false;
+        btn.innerText = "Watch Ad & Earn Coin";
+      }
+
+      releaseLock();
+    }
+  }, 1000);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  resetDailyIfNeeded();
+  render();
+  const btn = document.getElementById("watchAdBtn");
+  if(btn) btn.addEventListener("click", watchAd);
+});
+
+  <script>
