@@ -435,48 +435,30 @@ function watchAd() {
 </a>
 <script>
   <script>
-let deferredPrompt = null;
+<button id="installBtn" style="display:none;position:fixed;bottom:120px;right:12px;padding:12px 14px;border-radius:12px;background:#ff5722;color:#fff;border:0;z-index:999999;">
+Install App
+</button>
 
-// 1) Capture install event
+<script>
+let deferredPrompt = null;
+const installBtn = document.getElementById("installBtn");
+
 window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   deferredPrompt = e;
-
-  // If already showing popup, don't create again
-  if (document.getElementById("pwaPopup")) return;
-
-  // 2) Create custom popup UI
-  const popup = document.createElement("div");
-  popup.id = "pwaPopup";
-  popup.style = "position:fixed;bottom:80px;left:12px;right:12px;z-index:999999;background:#fff;padding:12px;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,.15);font-family:Arial;";
-
-  popup.innerHTML = `
-    <div style="font-weight:bold;">Install YourLuck App</div>
-    <div style="font-size:13px;color:#555;margin-top:4px;">Fast access & full screen experience</div>
-    <div style="display:flex;gap:8px;margin-top:10px;">
-      <button id="closePwa" style="flex:1;padding:10px 12px;border-radius:10px;border:1px solid #ddd;background:#fff;">Later</button>
-      <button id="installPwa" style="flex:1;padding:10px 12px;border-radius:10px;border:0;background:#ff5722;color:#fff;">Install</button>
-    </div>
-  `;
-
-  document.body.appendChild(popup);
-
-  document.getElementById("closePwa").onclick = () => popup.remove();
-
-  document.getElementById("installPwa").onclick = async () => {
-    popup.remove();
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-  };
+  installBtn.style.display = "block";
 });
 
-// 3) When installed
+installBtn.addEventListener("click", async () => {
+  installBtn.style.display = "none";
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+});
+
 window.addEventListener("appinstalled", () => {
-  const p = document.getElementById("pwaPopup");
-  if (p) p.remove();
+  installBtn.style.display = "none";
   deferredPrompt = null;
 });
 </script>
